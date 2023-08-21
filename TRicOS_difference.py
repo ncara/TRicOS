@@ -64,22 +64,6 @@ def rescale_raw(rawdata, df, wlmin, wlmax):
     raw.absor=raw.absor.copy()*fact      
     return(raw.copy())
 
-
-
-
-def baseline_als(y, lam, p, niter=10):
-    L = len(y)
-    D = sparse.diags([1,-2,1],[0,-1,-2], shape=(L,L-2))
-    D = lam * D.dot(D.transpose()) # Precompute this term since it does not depend on `w`
-    w = np.ones(L)
-    W = sparse.spdiags(w, 0, L, L)
-    for i in range(niter):
-        W.setdiag(w) # Do not create a new matrix, just update diagonal values
-        Z = W + D
-        z = sparse.linalg.spsolve(Z, w*y)
-        w = p * (y > z) + (1-p) * (y < z)
-    return z
-
 def baselinefitcorr_3seg_smooth(df,  segment1, segment2, segmentend, sigmaby3segment):
     #segmentend=df.wl.between(600,800)
     segment=segment1+segment2+segmentend
@@ -135,15 +119,15 @@ limbas=8000
 
 
 
-plt.rcParams["figure.figsize"] = (40/2.54,30/2.54)
+plt.rcParams["figure.figsize"] = (20/2.54,15/2.54)
 
 ####Parsing through the dir to find spectra and importing/treating them#### 
 directory = './' #C:\Users\ncaramel\Work Folders\Documents\pyrep\TRicOS_test_data
 
 print('Please input only processed spectra files, preferentially scaled averaged smoothed files')
 
-path_to_spec1=sys.argv[1]
-path_to_spec2=sys.argv[2]
+
+#path_to_spec2=sys.argv[2]
 
 
 # path_to_spec1='scaled_averaged_smoothed_300us.csv'
@@ -154,18 +138,16 @@ path_to_spec2=sys.argv[2]
 # for entry in os.scandir(directory):  
 #     if entry.path.endswith(".txt") and entry.is_file() and ("3U2" in entry.path) :
 #         listspec.append(entry.path)
-listspec=[path_to_spec1,path_to_spec2]
-print(listspec)
+#listspec=[path_to_spec1,path_to_spec2]
+#print(listspec)
 
 
-str="Hello, World!"
-print("World" in str)
-
+sys.argv[0] = './scaled_averaged_raw_200us.csv'  # sys.argv[1]
 
 spectras={}
 timecode={}
 # spec=pd.DataFrame(data=listspec,index=numspec,columns=["paths"])
-for nomfich in listspec:
+for nomfich in sys.argv:
     print(nomfich)
     
     spectras[nomfich]=pd.read_csv(filepath_or_buffer= nomfich,   #pandas has a neat function to read char-separated tables
@@ -193,20 +175,26 @@ for nomfich in listspec:
         timecode[nomfich]+=nomfich[lastnumber+1:lastnumber+3]
 
     
+#    
+#plt.plot(spectras[nomfich].wl,spectras[nomfich].abs_ground)
+#plt.plot(spectras[nomfich].wl,spectras[nomfich].abs_light)
+#plt.show()
+#    
 #%%% plot dark-light spectra
-
-diff_spec=spectras[path_to_spec2].copy()
-for i in diff_spec.index :
-    diff_spec.absor[i]=spectras[path_to_spec2].absor[i]-spectras[path_to_spec1].absor[i]
+diff_spec={}
+for i in spectras.keys() :
+    diff_spec[i]=pd.DataFrame(columns=['wl','absor'], index = list(spectras[nomfich].wl))
+    diff_spec[i].wl = diff_spec[i].index
+    diff_spec[i].absor=spectras[i].abs_light - spectras[i].abs_ground
     
     
 
-globmin=diff_spec.absor[diff_spec.wl.between(280,800)].min()
+globmin=diff_spec[i].absor[diff_spec[i].wl.between(280,800)].min()
 
-globmax=diff_spec.absor[diff_spec.wl.between(280,800)].max()
+globmax=diff_spec[i].absor[diff_spec[i].wl.between(280,800)].max()
 
 
-# globmax=diff_spec.absor[diff_spec.wl.between(280,700)].max()
+# globmax=diff_spec[i].absor[diff_spec[i].wl.between(280,700)].max()
 
 fig, ax = plt.subplots()     #First let's create our figure, subplots ensures we can plot several curves on the same graph
 ax.set_xlabel('Wavelength [nm]', fontsize=10)  #x axis 
@@ -216,20 +204,20 @@ ax.yaxis.set_label_coords(x=-0.1, y=0.5)       #position of the y axis
 palette=sns.color_palette(palette='bright', n_colors=2)   #This creates a palette with distinct colors in function of the number of sample, check it at https://seaborn.pydata.org/tutorial/color_palettes.html, in our case we might want to cherry-pick our colors, that's easy: palette are only lists of rgb triplets. Seaborn has a "desat" var, it modulates intensity of the color we can probably use that for emission/excitation plots 
 n=0                                            #this is just a counter for the palette, it's ugly as hell but hey, it works 
 
-ax.plot(diff_spec.wl,                  #x-axis is wavelength
-        diff_spec.absor ,                   #y-axis is absor, or emission, or else
+ax.plot(diff_spec[i].wl,                  #x-axis is wavelength
+        diff_spec[i].absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=timecode[path_to_spec1] + ' - ' + timecode[path_to_spec2],
+        label=timecode[i] + '- ground',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 
-ax.set_title(timecode[path_to_spec1] + ' - ' + timecode[path_to_spec2] + ' in crystallo absorbance difference spectrum', fontsize=10, fontweight='bold')  #This sets the title of the plot
+ax.set_title(timecode[i] + ' - ' + timecode[i] + ' in crystallo absorbance difference spectrum', fontsize=10, fontweight='bold')  #This sets the title of the plot
 ax.set_xlim([280,700]) 
 ax.set_ylim([globmin,globmax])
 ax.tick_params(labelsize=10)
 # ax.yaxis.set_ticks(np.arange(round(globmin,1), round(globmax+0.1,1), 0.1))  #This modulates the frequency of the x label (1, 50 ,100 ect)
-# legend = plt.legend(loc='upper right', shadow=True, prop={'size':7})
+legend = plt.legend(loc='upper right', shadow=True, prop={'size':7})
     
     
 # plt.show()
@@ -238,13 +226,13 @@ ax.tick_params(labelsize=10)
 
 
 
-figfilename = "difference_spectrum_" + timecode[path_to_spec1] + '-' + timecode[path_to_spec2] + ".pdf"             #Filename, for the PDF output, don't forget to close the last one before executing again, otherwise python can't write over it
+figfilename = "difference_spectrum_" + timecode[i] + ".pdf"             #Filename, for the PDF output, don't forget to close the last one before executing again, otherwise python can't write over it
 plt.savefig(figfilename, dpi=300, transparent=True,bbox_inches='tight') 
-figfilename = "difference_spectrum_" + timecode[path_to_spec1] + '-' + timecode[path_to_spec2] + ".png"             #Filename, for the PDF output, don't forget to close the last one before executing again, otherwise python can't write over it
+figfilename = "difference_spectrum_" + timecode[i] +  ".png"             #Filename, for the PDF output, don't forget to close the last one before executing again, otherwise python can't write over it
 plt.savefig(figfilename, dpi=300, transparent=True,bbox_inches='tight') 
-figfilename = "difference_spectrum_" + timecode[path_to_spec1] + '-' + timecode[path_to_spec2] + ".svg"             #Filename, for the PDF output, don't forget to close the last one before executing again, otherwise python can't write over it
+figfilename = "difference_spectrum_" + timecode[i] +  ".svg"             #Filename, for the PDF output, don't forget to close the last one before executing again, otherwise python can't write over it
 plt.savefig(figfilename, dpi=300, transparent=True,bbox_inches='tight') 
 plt.close()
 
-diff_spec.to_csv("difference_spectrum_" + timecode[path_to_spec1] + '-' + timecode[path_to_spec2] + ".csv", index=True)
+diff_spec[i].to_csv("difference_spectrum_" + timecode[i] + ".csv", index=True)
    
