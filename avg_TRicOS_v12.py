@@ -201,7 +201,7 @@ for nomfich in raw_lamp:
         average_signal=pd.DataFrame(index=raw_lamp[nomfich].index, columns = raw_lamp[nomfich].columns)
 #        average_signal.I=0
         average_signal['wl']=floatize(average_signal.index)
-    break
+#    break
 average_ground=pd.DataFrame(index=raw_lamp[list(raw_lamp.keys())[0]].index, columns = raw_lamp['./01_dark.txt'].columns)
 #average_ground.I=0
 average_ground['wl']=floatize(average_ground.index)
