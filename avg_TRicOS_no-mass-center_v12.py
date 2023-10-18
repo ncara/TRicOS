@@ -465,12 +465,12 @@ n=0                                            #this is just a counter for the p
 ax.plot(raw_spec.wl,                  #x-axis is wavelength
         raw_spec.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=nomfich[2:-4]+' ' + str(round(centroid_tp,1)) + ' nm',
+        label=nomfich[2:-4], #   +' ' + str(round(centroid_tp,1)) + ' nm',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 ax.plot(raw_spec.wl[area_tp],                  #x-axis is wavelength
         raw_spec.absor[area_tp] ,                   #y-axis is absor, or emission, or else
         linewidth=1,
-        color='cyan')               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
+        color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 # ax.axvline(centroid_tp, color = palette[0], ls = '-.')
@@ -480,12 +480,12 @@ ax.plot(raw_spec.wl[area_tp],                  #x-axis is wavelength
 ax.plot(raw_ground.wl,                  #x-axis is wavelength
         raw_ground.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label='ground ' + str(round(centroid_ground,1)) + ' nm',
+        label='ground ', #   + str(round(centroid_ground,1)) + ' nm',
         color=palette[1])              
 ax.plot(raw_ground.wl[area_ground],                  #x-axis is wavelength
         raw_ground.absor[area_ground] ,                   #y-axis is absor, or emission, or else
         linewidth=1, 
-        color='red')   
+        color=palette[1])   
 # ax.axvline(centroid_ground, color = palette[1], ls = '-.')
 
 
@@ -585,12 +585,12 @@ n=0                                            #this is just a counter for the p
 ax.plot(avg_spec.wl,                  #x-axis is wavelength
         avg_spec.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=nomfich[2:-4]+' ' + str(round(centroid_tp,1)) + ' nm',
+        label=nomfich[2:-4], #   , #   +' ' + str(round(centroid_tp,1)) + ' nm',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 ax.plot(avg_spec.wl[area_tp],                  #x-axis is wavelength
         avg_spec.absor[area_tp] ,                   #y-axis is absor, or emission, or else
         linewidth=1,
-        color='cyan')               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
+        color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 # ax.axvline(centroid_tp, color = palette[0], ls = '-.')
@@ -600,12 +600,12 @@ ax.plot(avg_spec.wl[area_tp],                  #x-axis is wavelength
 ax.plot(avg_ground.wl,                  #x-axis is wavelength
         avg_ground.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label='ground ' + str(round(centroid_ground,1)) + ' nm',
+        label='ground ', #   + str(round(centroid_ground,1)) + ' nm',
         color=palette[1])              
 ax.plot(avg_ground.wl[area_ground],                  #x-axis is wavelength
         avg_ground.absor[area_ground] ,                   #y-axis is absor, or emission, or else
         linewidth=1, 
-        color='red')   
+        color=palette[1])   
 # ax.axvline(centroid_ground, color = palette[1], ls = '-.')
 
 
@@ -705,12 +705,12 @@ n=0                                            #this is just a counter for the p
 ax.plot(onlysmoothed_spec.wl,                  #x-axis is wavelength
         onlysmoothed_spec.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=nomfich[2:-4]+' ' + str(round(centroid_tp,1)) + ' nm',
+        label=nomfich[2:-4], #   +' ' + str(round(centroid_tp,1)) + ' nm',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 ax.plot(onlysmoothed_spec.wl[area_tp],                  #x-axis is wavelength
         onlysmoothed_spec.absor[area_tp] ,                   #y-axis is absor, or emission, or else
         linewidth=1,
-        color='cyan')               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
+        color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 # ax.axvline(centroid_tp, color = palette[0], ls = '-.')
@@ -720,12 +720,12 @@ ax.plot(onlysmoothed_spec.wl[area_tp],                  #x-axis is wavelength
 ax.plot(onlysmoothed_ground.wl,                  #x-axis is wavelength
         onlysmoothed_ground.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label='ground ' + str(round(centroid_ground,1)) + ' nm',
+        label='ground ', #   + str(round(centroid_ground,1)) + ' nm',
         color=palette[1])              
 ax.plot(onlysmoothed_ground.wl[area_ground],                  #x-axis is wavelength
         onlysmoothed_ground.absor[area_ground] ,                   #y-axis is absor, or emission, or else
         linewidth=1, 
-        color='red')   
+        color=palette[1])   
 # ax.axvline(centroid_ground, color = palette[1], ls = '-.')
 
 
@@ -826,12 +826,12 @@ n=0                                            #this is just a counter for the p
 ax.plot(smoothed_spec.wl,                  #x-axis is wavelength
         smoothed_spec.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=nomfich[2:-4]+' ' + str(round(centroid_tp,1)) + ' nm',
+        label=nomfich[2:-4], #   +' ' + str(round(centroid_tp,1)) + ' nm',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 ax.plot(smoothed_spec.wl[area_tp],                  #x-axis is wavelength
         smoothed_spec.absor[area_tp] ,                   #y-axis is absor, or emission, or else
         linewidth=1,
-        color='cyan')               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
+        color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 # ax.axvline(centroid_tp, color = palette[0], ls = '-.')
@@ -841,12 +841,12 @@ ax.plot(smoothed_spec.wl[area_tp],                  #x-axis is wavelength
 ax.plot(smoothed_ground.wl,                  #x-axis is wavelength
         smoothed_ground.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label='ground ' + str(round(centroid_ground,1)) + ' nm',
+        label='ground ', #   + str(round(centroid_ground,1)) + ' nm',
         color=palette[1])              
 ax.plot(smoothed_ground.wl[area_ground],                  #x-axis is wavelength
         smoothed_ground.absor[area_ground] ,                   #y-axis is absor, or emission, or else
         linewidth=1, 
-        color='red')   
+        color=palette[1])   
 # ax.axvline(centroid_ground, color = palette[1], ls = '-.')
 
 
@@ -947,12 +947,12 @@ n=0                                            #this is just a counter for the p
 ax.plot(scaled_avg_spec.wl,                  #x-axis is wavelength
         scaled_avg_spec.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=nomfich[2:-4]+' ' + str(round(centroid_tp,1)) + ' nm',
+        label=nomfich[2:-4], #   +' ' + str(round(centroid_tp,1)) + ' nm',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 ax.plot(scaled_avg_spec.wl[area_tp],                  #x-axis is wavelength
         scaled_avg_spec.absor[area_tp] ,                   #y-axis is absor, or emission, or else
         linewidth=1,
-        color='cyan')               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
+        color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 # ax.axvline(centroid_tp, color = palette[0], ls = '-.')
@@ -962,12 +962,12 @@ ax.plot(scaled_avg_spec.wl[area_tp],                  #x-axis is wavelength
 ax.plot(scaled_avg_ground.wl,                  #x-axis is wavelength
         scaled_avg_ground.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label='ground ' + str(round(centroid_ground,1)) + ' nm',
+        label='ground ', #   + str(round(centroid_ground,1)) + ' nm',
         color=palette[1])              
 ax.plot(scaled_avg_ground.wl[area_ground],                  #x-axis is wavelength
         scaled_avg_ground.absor[area_ground] ,                   #y-axis is absor, or emission, or else
         linewidth=1, 
-        color='red')   
+        color=palette[1])   
 # ax.axvline(centroid_ground, color = palette[1], ls = '-.')
 
 
@@ -1068,12 +1068,12 @@ n=0                                            #this is just a counter for the p
 ax.plot(scaled_smoothed_spec.wl,                  #x-axis is wavelength
         scaled_smoothed_spec.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label=nomfich[2:-4]+' ' + str(round(centroid_tp,1)) + ' nm',
+        label=nomfich[2:-4], #   +' ' + str(round(centroid_tp,1)) + ' nm',
         color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 ax.plot(scaled_smoothed_spec.wl[area_tp],                  #x-axis is wavelength
         scaled_smoothed_spec.absor[area_tp] ,                   #y-axis is absor, or emission, or else
         linewidth=1,
-        color='cyan')               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
+        color=palette[0])               #This determines the color of the curves, you can create a custom list of colors such a c['blue','red'] ect
 
 
 # ax.axvline(centroid_tp, color = palette[0], ls = '-.')
@@ -1083,12 +1083,12 @@ ax.plot(scaled_smoothed_spec.wl[area_tp],                  #x-axis is wavelength
 ax.plot(scaled_smoothed_ground.wl,                  #x-axis is wavelength
         scaled_smoothed_ground.absor ,                   #y-axis is absor, or emission, or else
         linewidth=1,                    #0.5 : pretty thin, 2 : probably what Hadrien used 
-        label='ground ' + str(round(centroid_ground,1)) + ' nm',
+        label='ground ', #   + str(round(centroid_ground,1)) + ' nm',
         color=palette[1])              
 ax.plot(scaled_smoothed_ground.wl[area_ground],                  #x-axis is wavelength
         scaled_smoothed_ground.absor[area_ground] ,                   #y-axis is absor, or emission, or else
         linewidth=1, 
-        color='red')   
+        color=palette[1])   
 # ax.axvline(centroid_ground, color = palette[1], ls = '-.')
 
 
