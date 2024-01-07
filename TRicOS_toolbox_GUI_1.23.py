@@ -168,6 +168,20 @@ except ImportError:
         sp = importlib.import_module('scipy')
 from scipy import signal 
 
+try:
+    re = importlib.import_module('re')
+    print("re is already installed.")
+except ImportError:
+    print("re is not installed. Installing now...")
+    # Install SciPy using pip
+    try:
+        import pip
+    except ImportError:
+        print("pip is not installed. Please install pip to continue.")
+    else:
+        pip.main(['install', 're'])
+        print("re has been installed.")
+        wx = importlib.import_module('re')
 
 if 'app' in vars():
     del app
@@ -220,13 +234,26 @@ def absorbance(tmp):
         return(ourdata.drop(columns=['I','bgd',"I0"]).copy())
 floatize=np.vectorize(float)   
 
+def longest_digit_sequence(input_string):
+    # Use regular expression to find all digit sequences in the string
+    digit_sequences = re.findall(r'\d+', input_string)
+    
+    # Find the longest digit sequence
+    longest_sequence = max(digit_sequences, key=len, default=None)
+    
+    return longest_sequence
+
 class GenPanel(wx.Panel):
     raw_lamp={}
     raw_spec = {}
     const_spec = {}
     ready_spec = {}
-    diffspec=pd.DataFrame(data=None,columns=['wl','A'])
-
+    diffspec = pd.DataFrame(data=None,columns=['wl','A'])
+    list_spec = pd.DataFrame(data=None, columns = ['file_name','time_code','abs'])
+    list_spec.index = list_spec.time_code
+    
+    
+    
 class RightPanel(GenPanel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, style = wx.FULL_REPAINT_ON_RESIZE | wx.SUNKEN_BORDER)
@@ -428,7 +455,51 @@ class RightPanel(GenPanel):
             ax.tick_params(labelsize=16)
             ax.legend(loc='upper right', shadow=True, prop={'size':8})
             self.canvas.draw()
+        elif typecorr == 'time-trace':
+            xticks=[2,10,100,1000,10000,100000,1000000,10000000]
+            xlabels=['0','1e-5','1e-4','1e-3','1e-2','1e-1','1','10']
+            # tplot=list(lam415.t[1:])
+            # tplot=[1]+tplot
+            # lam415['t_plot']=tplot
             
+            print('trying to print the time-trace')
+            ####Plotting the data#### copy the dosefig scripts
+            
+            # fig, ax = plt.subplots()     #First let's create our figure, subplots ensures we can plot several curves on the same graph
+            ax.set_xlabel('Time since laser pulse [s]', fontsize=20)  #x axis 
+            ax.xaxis.set_label_coords(x=0.5, y=-0.08)      #This determines where the x-axis is on the figure 
+            ax.set_ylabel('Absorbance at 415nm', fontsize=20)               #Label of the y axis
+            ax.yaxis.set_label_coords(x=-0.1, y=0.5)       #position of the y axis 
+            # palette=sns.color_palette(palette="bright", n_colors=2)   #This creates a palette with distinct colors in function of the number of sample, check it at https://seaborn.pydata.org/tutorial/color_palettes.html, in our case we might want to cherry-pick our colors, that's easy: palette are only lists of rgb triplets. Seaborn has a "desat" var, it modulates intensity of the color we can probably use that for emission/excitation plots 
+            
+            n=0                          #this is just a counter for the palette, it's ugly as hell but hey, it works 
+                              #We can then parse over our dictionary to plot our data
+            for i in GenPanel.list_spec.index:
+                ax.plot(GenPanel.list_spec.loc[i, 'time_code'], 
+                    GenPanel.list_spec.loc[i, 'abs'] ,
+                    'bo',
+                    markersize=10)
+                print(GenPanel.list_spec.loc[i, 'time_code'], GenPanel.list_spec.loc[i, 'abs'])
+                    # color=palette[0])
+            
+            # ax.plot(lam415.t,
+            #         lam415.model,             #y-axis is abs, or emission, or else
+            #         linewidth=1,              #0.5 : pretty thin, 2 : probably what Hadrien used 
+            #         label="modelled relaxation curve with tau="+format(para[2], '.2f')+"a="+format(para[0], '.2f')+"b="+format(para[1], '.2f'),                  #Label is currently the name of our file, we could replace that by a list of names
+            #         color=palette[1])
+            
+            
+            ax.set_title('absorbance at 415nm over time after laser pulse', fontsize=20, fontweight='bold')  #This sets the title of the plot
+            # ax.set_xlim([0, closest(lam415.t,100)]) 
+            ax.set_xscale('log')
+            # ax.xaxis.set_ticks(xticks)
+            # ax.xaxis.set_ticklabels(xlabels)
+            # ax.set_ylim([lam415.A.min(), lam415.A[lam415.t.between(0,100,inclusive="both")].max()+0.05])
+            ax.tick_params(labelsize=15)
+            # ax.yaxis.set_ticks(np.arange(lam415.A.min(), lam415.A[lam415.t.between(0,100,inclusive="both")].max()+0.05, 0.05))  #This modulates the frequency of the x label (1, 50 ,40 ect)
+            # legend = plt.legend(loc='lower right', shadow=True, prop={'size':7})
+            
+            self.canvas.draw()
             
 class LeftPanel(GenPanel):
     
@@ -486,6 +557,7 @@ class LeftPanel(GenPanel):
         self.field_nopeak_red = wx.TextCtrl(self, style = wx.TE_CENTER)
         self.label_leeway_factor = wx.StaticText(self, label="expected OD in the segment (% max peak)", style = wx.ALIGN_CENTER_HORIZONTAL)
         self.field_leeway_factor = wx.TextCtrl(self, style = wx.TE_CENTER)
+        
         # diagnostic plots ?
         self.diagplots_checkbox = wx.CheckBox(self, label = 'no diagnostic plots ?', style = wx.CHK_2STATE)
         
@@ -543,6 +615,13 @@ class LeftPanel(GenPanel):
         self.button_drop_spec = wx.Button(self, label='Remove a spectrum')
         self.button_drop_spec.Bind(wx.EVT_BUTTON, self.on_drop_spec)
         
+        # kinetics 
+        self.field_timetrace = wx.TextCtrl(self, value = '280', style = wx.TE_CENTER)
+        self.label_timetrace = wx.StaticText(self, label = 'Kinetics', style = wx.ALIGN_CENTER_HORIZONTAL)
+        
+        self.button_kin = wx.Button(self, label = 'Time-trace')
+        self.button_kin.Bind(wx.EVT_BUTTON, self.on_timetrace)
+        
         # save
         self.button_save = wx.Button(self, label="Save figure and spectra")
         self.button_save.Bind(wx.EVT_BUTTON, self.on_save)
@@ -558,6 +637,10 @@ class LeftPanel(GenPanel):
         sizer.Add(self.button_diffspec, 1, wx.EXPAND | wx.ALL, border = 2)
         sizer.Add(self.mass_center_checkbox, 1, wx.ALIGN_CENTER)
         sizer.Add(self.button_drop_spec, 1, wx.EXPAND | wx.ALL, border = 2)
+        sizer.Add(self.label_timetrace, 0, wx.ALIGN_CENTER, border = 0)
+        sizer.Add(self.field_timetrace, 0, wx.ALIGN_CENTER | wx.ALL, border = 0)
+          
+        sizer.Add(self.button_kin, 1, wx.EXPAND | wx.ALL, border = 2)
         sizer.Add(self.button_save, 1, wx.EXPAND | wx.ALL, border = 2)
         self.SetSizer(sizer)
         # self.SetBackgroundColour('grey') 
@@ -629,10 +712,16 @@ class LeftPanel(GenPanel):
                 GenPanel.raw_spec[avgname]=absorbance(average_signal.copy())
                         # print(GenPanel.raw_lamp[file_name].columns)
                 print(f"File '{avgname}' added spectra list with data: {GenPanel.raw_spec[avgname].A}")
+                GenPanel.list_spec.loc[file_name,'file_name']=file_name
+                if 'dark' in avgname :
+                    GenPanel.list_spec.loc[file_name,'time_code']=8
+                else :
+                    GenPanel.list_spec.loc[file_name,'time_code']=int(max(re.findall(r'\d+us', avgname), key = len)[0:-2])#longest_digit_sequence(file_name)
+                GenPanel.list_spec.loc[file_name,'abs']=GenPanel.raw_spec[avgname].loc[min(GenPanel.raw_spec[avgname]['wl'], key=lambda x: abs(x - 280)),'A']
                 self.update_right_panel('raw')
             dialog.Destroy()
         else :
-            self.typecorr = 'raw'
+            # self.typecorr = 'raw'
             wildcard = "TXT files (*.txt)|*.txt|All files (*.*)|*.*"
             dialog = wx.FileDialog(self, "Choose one or several files", wildcard=wildcard, style=wx.FD_OPEN | wx.FD_MULTIPLE)
             if dialog.ShowModal() == wx.ID_OK:
@@ -653,11 +742,13 @@ class LeftPanel(GenPanel):
                     print(f"File '{file_name}' added to dictionary with data: {GenPanel.raw_spec[file_name].A}")
                 self.update_right_panel('raw')
             dialog.Destroy()
+        
         # Plot the DataFrame
         
         
         
     def on_constant_corr(self, event):
+        #TODO need to fix the scaling
         self.typecorr = 'const'
         baseline_blue = float(self.field_baseline_blue.GetValue())
         baseline_red = float(self.field_baseline_red.GetValue())
@@ -668,7 +759,7 @@ class LeftPanel(GenPanel):
             tmp=GenPanel.raw_spec[i].copy()
             tmp.A-=mean(GenPanel.raw_spec[i].A[segmentend])
             if self.GetParent().left_panel.scaling_checkbox.GetValue() :
-                tmp.A*=1/tmp.A[tmp.wl.between(scaling_top-10,scaling_top+10,inclusive='both')].max()
+                tmp.A*=1/tmp.A[tmp.wl.between(scaling_top-5,scaling_top+5,inclusive='both')].mean()
             if self.GetParent().left_panel.smoothing_checkbox.GetValue() :
                 tmp.A=sp.signal.savgol_filter(x=tmp.A.copy(),     #This is the smoothing function, it takes in imput the y-axis data directly and fits a polynom on each section of the data at a time
                                               window_length=21,  #This defines the section, longer sections means smoother data but also bigger imprecision
@@ -724,7 +815,7 @@ class LeftPanel(GenPanel):
             corrected=tmp.copy()
             corrected.A=tmp.A.copy()-baseline.A
             if self.GetParent().left_panel.scaling_checkbox.GetValue() :
-                corrected.A*=1/corrected.A[corrected.wl.between(scaling_top-10,scaling_top+10,inclusive='both')].max()
+                corrected.A*=1/corrected.A[corrected.wl.between(scaling_top-5,scaling_top+5,inclusive='both')].mean()
             GenPanel.ready_spec[i]=corrected
             # tmp, baseline=baselinefitcorr_3seg_smooth(tmp,  segment1, segment2, segmentend, sigmafor3segment)
             if not self.GetParent().left_panel.diagplots_checkbox.GetValue() : 
@@ -848,10 +939,29 @@ class LeftPanel(GenPanel):
              
  #this needs to be update panel with the LeftPanel.typercor variable
             self.update_right_panel(self.typecorr)
-    
+    def on_timetrace(self, event):
+        
+        wavelength = float(self.field_timetrace.GetValue())
+        print(wavelength)
+        if self.typecorr == 'raw' :
+            for i in GenPanel.list_spec.index :
+                GenPanel.list_spec.loc[i, 'abs'] =  GenPanel.raw_spec[i].loc[min(GenPanel.raw_spec[i]['wl'], key=lambda x: abs(x - wavelength)),'A']
+        if self.typecorr == 'const' :
+            for i in GenPanel.list_spec.index :
+                GenPanel.list_spec.loc[i, 'abs'] =  GenPanel.const_spec[i].loc[min(GenPanel.const_spec[i]['wl'], key=lambda x: abs(x - wavelength)),'A']
+        if self.typecorr == 'ready' :
+            for i in GenPanel.list_spec.index :
+                GenPanel.list_spec.loc[i, 'abs'] =  GenPanel.ready_spec[i].loc[min(GenPanel.ready_spec[i]['wl'], key=lambda x: abs(x - wavelength)),'A']
+        print(GenPanel.list_spec)
+        # self.typecorr = 'time-trace'
+        
+        self.update_right_panel('time-trace')
+        #TODO smooth over the plot code for the kinetic function 
+        #TODO implement a time-code for icOS spectra 
+        
     def on_save(self, event):
         wildcard = "CSV files (*.csv)|*.csv|All files (*.*)|*.*"
-        dialog = wx.FileDialog(self, "Save File(s)", wildcard=wildcard, style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self, "Save File(s)", wildcard=wildcard, style33=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         if dialog.ShowModal() == wx.ID_OK:
             totalpath = dialog.GetPath()
             # file_path2 = file_path.split('/')[:-1]
@@ -908,6 +1018,8 @@ class LeftPanel(GenPanel):
         else :
             scaling_top = float(self.field_topeak.GetValue())
         print(scaling_top)
+        if self.GetParent().left_panel.scaling_checkbox.GetValue() :
+            GenPanel.raw_spec.A*=1/GenPanel.raw_spec.A[GenPanel.raw_spec.wl.between(scaling_top-5,scaling_top+5,inclusive='both')].mean()
         self.GetParent().right_panel.plot_data('raw', scaling_top)
             
 
@@ -949,15 +1061,6 @@ class FileChooser(wx.Dialog):
         self.EndModal(wx.ID_OK)
     
     
-    # def InitUI(self): # now this needs to behave differently based on th emenu option chosen
-    #     menubar = wx.MenuBar()
-    #     fileMenu = wx.Menu()
-    #     options = ["raw", "const", "scat"]
-    #     for option in options:
-    #         item = fileMenu.Append(wx.ID_ANY, option)
-    #         self.Bind(wx.EVT_MENU, self.OnOption, item)
-    #     menubar.Append(fileMenu, '&Options')
-    #     self.GetParent().GetParent().GetParent().SetMenuBar(menubar) # this needs to be mapped to the frame
 
     def OnOption(self, event):
         selected_option = self.GetMenuBar().FindItemById(event.GetId()).GetLabel()
