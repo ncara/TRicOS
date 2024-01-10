@@ -648,20 +648,32 @@ class LeftPanel(GenPanel):
         
     def on_open_file(self, event):
         self.typecorr = 'raw'
+        if platform.system() == 'Windows' :
+            dirsep='\\'
+        else:# or platform.system() == 'MacOS'
+            dirsep='/'
         if self.GetParent().left_panel.TRicOS_checkbox.GetValue() :
             wildcard = "TXT files (*.txt)|*.txt|All files (*.*)|*.*"
             dialog = wx.FileDialog(self, "Choose one or several files", wildcard=wildcard, style=wx.FD_OPEN | wx.FD_MULTIPLE)
             toaverage=[]
             if dialog.ShowModal() == wx.ID_OK:
                 file_paths = dialog.GetPaths()
+                
                 for file_path in file_paths:
-                    if "ms" in file_path :
-                        name_correct=file_path.replace('ms', '000us')
-                        os.rename(file_path, name_correct)
-                    elif "s" in file_path and "ms" not in file_path and "us" not in file_path: 
+                    pathtospec=''
+                    for i in file_path.split(dirsep)[0:-1]:
+                        pathtospec+=i+dirsep
+                        
+                    tmpname = file_path.split(dirsep)[-1]
+                    print(pathtospec)
+                    print(tmpname)
+                    if "ms" in tmpname :
+                        name_correct=tmpname.replace('ms', '000us')
+                        os.rename(file_path, pathtospec + name_correct)
+                    elif "s" in tmpname and "ms" not in file_path and "us" not in file_path: 
                         name_correct=file_path.replace('s','000000us')
-                        os.rename(file_path, name_correct)
-                    file_name = file_path.split('/')[-1][0:-4]
+                        os.rename(file_path, pathtospec + name_correct)
+                    file_name = file_path.split(dirsep)[-1][0:-4]
                     # print(file_name)
                     if file_path[-4:] == '.txt':
                         toaverage.append(file_name)
