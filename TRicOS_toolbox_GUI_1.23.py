@@ -671,7 +671,7 @@ class LeftPanel(GenPanel):
                         name_correct=tmpname.replace('ms', '000us')
                         os.rename(file_path, pathtospec + name_correct)
                     elif "s" in tmpname and "ms" not in file_path and "us" not in file_path: 
-                        name_correct=file_path.replace('s','000000us')
+                        name_correct=tmpname.replace('s','000000us')
                         os.rename(file_path, pathtospec + name_correct)
                     file_name = file_path.split(dirsep)[-1][0:-4]
                     # print(file_name)
