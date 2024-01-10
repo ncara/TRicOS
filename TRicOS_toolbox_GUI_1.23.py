@@ -265,9 +265,15 @@ class RightPanel(GenPanel):
         sizer.Add(self.toolbar, proportion=0, flag=wx.EXPAND)
         self.SetSizer(sizer)
         
+            
     def plot_data(self,typecorr,scaling_top):
         self.figure.clear()
         ax = self.figure.add_subplot()
+        if self.GetParent().left_panel.TRicOS_checkbox.GetValue() :
+            pal='Spectral_r'
+        else :
+            pal='bright'
+            
         if typecorr == 'raw':
             print('plotting raw data')
             listmax=[]
@@ -287,7 +293,7 @@ class RightPanel(GenPanel):
             ax.xaxis.set_label_coords(x=0.5, y=-0.08)      
             ax.set_ylabel('Absorbance [AU]', fontsize=20)               
             ax.yaxis.set_label_coords(x=-0.1, y=0.5)       
-            palette=sns.color_palette(palette='bright', n_colors=len(GenPanel.raw_spec))   
+            palette=sns.color_palette(palette=pal, n_colors=len(GenPanel.raw_spec))   
             n=0   
             if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                 centroids = self.GetParent().left_panel.mass_center(typecorr = typecorr)                                        
@@ -343,7 +349,7 @@ class RightPanel(GenPanel):
             ax.xaxis.set_label_coords(x=0.5, y=-0.08)
             ax.set_ylabel('Absorbance [AU]', fontsize=20)
             ax.yaxis.set_label_coords(x=-0.1, y=0.5)
-            palette=sns.color_palette(palette='bright', n_colors=len(GenPanel.const_spec))
+            palette=sns.color_palette(palette=pal, n_colors=len(GenPanel.const_spec))
             n=0
             if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                 centroids = self.GetParent().left_panel.mass_center(typecorr = typecorr)  
@@ -394,7 +400,7 @@ class RightPanel(GenPanel):
             ax.xaxis.set_label_coords(x=0.5, y=-0.08)      
             ax.set_ylabel('Absorbance [AU]', fontsize=20)               
             ax.yaxis.set_label_coords(x=-0.1, y=0.5)       
-            palette=sns.color_palette(palette='bright', n_colors=len(GenPanel.ready_spec))   
+            palette=sns.color_palette(palette=pal, n_colors=len(GenPanel.ready_spec))   
             n=0  
             if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                 centroids = self.GetParent().left_panel.mass_center(typecorr = typecorr)                                            
@@ -437,15 +443,15 @@ class RightPanel(GenPanel):
                 ax.plot(GenPanel.diffspec.wl,                  
                       GenPanel.diffspec.A ,                   
                       linewidth=2,
-                      label=i +" mass center = " +format(centroids[i], '.3f'), 
+            #           label=i +" mass center = " +format(centroids[i], '.3f'), 
                       color=palette[n]) 
-                ax.axvline(centroids[i], color = palette[n], ls = '-.')
+            #     ax.axvline(centroids[i], color = palette[n], ls = '-.')
             else :
                 if self.GetParent().left_panel.scaling_checkbox.GetValue() :
                     ax.plot(GenPanel.diffspec.wl,                  
                             GenPanel.diffspec.A ,                   
                             linewidth=2,
-                            label=" mass center = " +format(GenPanel.diffspec[GenPanel.diffspec.wl.between(scaling_top-10,scaling_top+10)].A.idxmax(), '.2f'), 
+                            # label=" mass center = " +format(GenPanel.diffspec[GenPanel.diffspec.wl.between(scaling_top-10,scaling_top+10)].A.idxmax(), '.2f'), 
                             color=palette[n]) 
                     
             n=n+1
@@ -456,19 +462,19 @@ class RightPanel(GenPanel):
             ax.legend(loc='upper right', shadow=True, prop={'size':8})
             self.canvas.draw()
         elif typecorr == 'time-trace':
-            xticks=[2,10,100,1000,10000,100000,1000000,10000000]
+            xticks=[8,10,100,1000,10000,100000,1000000,10000000]
             xlabels=['0','1e-5','1e-4','1e-3','1e-2','1e-1','1','10']
             # tplot=list(lam415.t[1:])
             # tplot=[1]+tplot
             # lam415['t_plot']=tplot
-            
-            print('trying to print the time-trace')
+            wavelength = str(self.GetParent().left_panel.field_timetrace.GetValue())
+            print('trying to print the time-trace at' + wavelength + 'nm')
             ####Plotting the data#### copy the dosefig scripts
             
             # fig, ax = plt.subplots()     #First let's create our figure, subplots ensures we can plot several curves on the same graph
             ax.set_xlabel('Time since laser pulse [s]', fontsize=20)  #x axis 
             ax.xaxis.set_label_coords(x=0.5, y=-0.08)      #This determines where the x-axis is on the figure 
-            ax.set_ylabel('Absorbance at 415nm', fontsize=20)               #Label of the y axis
+            ax.set_ylabel('Absorbance at ' + wavelength + 'nm', fontsize=20)               #Label of the y axis
             ax.yaxis.set_label_coords(x=-0.1, y=0.5)       #position of the y axis 
             # palette=sns.color_palette(palette="bright", n_colors=2)   #This creates a palette with distinct colors in function of the number of sample, check it at https://seaborn.pydata.org/tutorial/color_palettes.html, in our case we might want to cherry-pick our colors, that's easy: palette are only lists of rgb triplets. Seaborn has a "desat" var, it modulates intensity of the color we can probably use that for emission/excitation plots 
             
@@ -489,7 +495,7 @@ class RightPanel(GenPanel):
             #         color=palette[1])
             
             
-            ax.set_title('absorbance at 415nm over time after laser pulse', fontsize=20, fontweight='bold')  #This sets the title of the plot
+            ax.set_title('absorbance at ' + wavelength + 'nm over time after laser pulse', fontsize=20, fontweight='bold')  #This sets the title of the plot
             # ax.set_xlim([0, closest(lam415.t,100)]) 
             ax.set_xscale('log')
             # ax.xaxis.set_ticks(xticks)
@@ -670,9 +676,11 @@ class LeftPanel(GenPanel):
                     if "ms" in tmpname :
                         name_correct=tmpname.replace('ms', '000us')
                         os.rename(file_path, pathtospec + name_correct)
-                    elif "s" in tmpname and "ms" not in file_path and "us" not in file_path: 
+                        file_path=pathtospec + name_correct
+                    elif "s" in tmpname and "ms" not in tmpname and "us" not in tmpname: 
                         name_correct=tmpname.replace('s','000000us')
                         os.rename(file_path, pathtospec + name_correct)
+                        file_path=pathtospec + name_correct
                     file_name = file_path.split(dirsep)[-1][0:-4]
                     # print(file_name)
                     if file_path[-4:] == '.txt':
@@ -720,16 +728,16 @@ class LeftPanel(GenPanel):
                             else:
                                 average_signal.loc[wavelength,'A']=(average_signal.loc[wavelength,'A']+GenPanel.raw_lamp[nomfich].loc[wavelength,'A'])/2
                 # print(average_signal)
-                avgname=''.join(toaverage)
+                avgname=toaverage[0]#''.join(toaverage)
                 GenPanel.raw_spec[avgname]=absorbance(average_signal.copy())
                         # print(GenPanel.raw_lamp[file_name].columns)
                 print(f"File '{avgname}' added spectra list with data: {GenPanel.raw_spec[avgname].A}")
-                GenPanel.list_spec.loc[file_name,'file_name']=file_name
+                GenPanel.list_spec.loc[avgname,'file_name']=avgname
                 if 'dark' in avgname :
-                    GenPanel.list_spec.loc[file_name,'time_code']=8
+                    GenPanel.list_spec.loc[avgname,'time_code']=8
                 else :
-                    GenPanel.list_spec.loc[file_name,'time_code']=int(max(re.findall(r'\d+us', avgname), key = len)[0:-2])#longest_digit_sequence(file_name)
-                GenPanel.list_spec.loc[file_name,'abs']=GenPanel.raw_spec[avgname].loc[min(GenPanel.raw_spec[avgname]['wl'], key=lambda x: abs(x - 280)),'A']
+                    GenPanel.list_spec.loc[avgname,'time_code']=int(max(re.findall(r'\d+us', avgname), key = len)[0:-2])#longest_digit_sequence(file_name)
+                GenPanel.list_spec.loc[avgname,'abs']=GenPanel.raw_spec[avgname].loc[min(GenPanel.raw_spec[avgname]['wl'], key=lambda x: abs(x - 280)),'A']
                 self.update_right_panel('raw')
             dialog.Destroy()
         else :
@@ -739,7 +747,7 @@ class LeftPanel(GenPanel):
             if dialog.ShowModal() == wx.ID_OK:
                 file_paths = dialog.GetPaths()
                 for file_path in file_paths:
-                    file_name = file_path.split('/')[-1][0:-4]
+                    file_name = file_path.split(dirsep)[-1][0:-4]
                     print(file_name)
                     if file_path[-4:] == '.txt':
                         GenPanel.raw_spec[file_name] = pd.read_csv(filepath_or_buffer= file_path,
@@ -752,6 +760,17 @@ class LeftPanel(GenPanel):
                                   engine="python")
                     GenPanel.raw_spec[file_name].index=GenPanel.raw_spec[file_name].wl
                     print(f"File '{file_name}' added to dictionary with data: {GenPanel.raw_spec[file_name].A}")
+                
+                
+                if "ms" in file_name :
+                    name_correct=file_name.replace('ms', '000us')
+                elif "s" in file_name and "ms" not in file_name and "us" not in file_name: 
+                    name_correct=file_name.replace('s','000000us')
+                if 'dark' in file_name :
+                    GenPanel.list_spec.loc[file_name,'time_code']=8
+                else :
+                    GenPanel.list_spec.loc[file_name,'time_code']=int(max(re.findall(r'\d+us', file_name), key = len, default='0us')[0:-2])#longest_digit_sequence(file_name)
+                GenPanel.list_spec.loc[file_name,'abs']=GenPanel.raw_spec[file_name].loc[min(GenPanel.raw_spec[file_name]['wl'], key=lambda x: abs(x - 280)),'A']
                 self.update_right_panel('raw')
             dialog.Destroy()
         
@@ -915,18 +934,18 @@ class LeftPanel(GenPanel):
         if self.typecorr == 'raw':
             GenPanel.diffspec.wl = GenPanel.raw_spec[selections[0]].wl
             GenPanel.diffspec.index = GenPanel.diffspec.wl
-            print(GenPanel.diffspec)
             GenPanel.diffspec.A = GenPanel.raw_spec[selections[0]].A-GenPanel.raw_spec[selections[1]].A
+            # print(GenPanel.diffspec[350:700])
         elif self.typecorr == 'const':
             GenPanel.diffspec.wl = GenPanel.const_spec[selections[0]].wl
             GenPanel.diffspec.index = GenPanel.diffspec.wl
-            print(GenPanel.diffspec)
             GenPanel.diffspec.A = GenPanel.const_spec[selections[0]].A-GenPanel.const_spec[selections[1]].A
+            # print(GenPanel.diffspec[350:700])
         elif self.typecorr == 'ready':
             GenPanel.diffspec.wl = GenPanel.ready_spec[selections[0]].wl
             GenPanel.diffspec.index = GenPanel.diffspec.wl
-            print(GenPanel.diffspec)
             GenPanel.diffspec.A = GenPanel.ready_spec[selections[0]].A-GenPanel.ready_spec[selections[1]].A
+            # print(GenPanel.diffspec[350:700])
         self.update_right_panel('diff')
     
     def on_drop_spec(self, event): #htis should open a Filechooser dialog and remove the 
@@ -968,27 +987,23 @@ class LeftPanel(GenPanel):
         # self.typecorr = 'time-trace'
         
         self.update_right_panel('time-trace')
-        #TODO smooth over the plot code for the kinetic function 
         #TODO implement a time-code for icOS spectra 
         
     def on_save(self, event):
         wildcard = "CSV files (*.csv)|*.csv|All files (*.*)|*.*"
-        dialog = wx.FileDialog(self, "Save File(s)", wildcard=wildcard, style33=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self, "Save File(s)", wildcard=wildcard, style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         if dialog.ShowModal() == wx.ID_OK:
             totalpath = dialog.GetPath()
             # file_path2 = file_path.split('/')[:-1]
             if platform.system() == 'Windows' :
-                file_path=''
-                for i in totalpath.split('\\')[:-1]:
-                    file_path+=i+'\\'
-                print(file_path)
-                file_name = totalpath.split('\\')[-1][0:-4]
+                dirsep='\\'
             else:# or platform.system() == 'MacOS'
-                file_path=''
-                for i in totalpath.split('/')[:-1]:
-                    file_path+=i+'/'
-                print(file_path)
-                file_name = totalpath.split('/')[-1]
+                dirsep='/'
+            file_path=''
+            for i in totalpath.split(dirsep)[:-1]:
+                file_path+=i+dirsep
+            print(file_path)
+            file_name = totalpath.split(dirsep)[-1][0:-4]
                 
         dialog.Destroy()
         towrite_raw_spectra=GenPanel.raw_spec[next(iter(GenPanel.raw_spec))].drop(columns=['wl','A'])
@@ -1008,6 +1023,9 @@ class LeftPanel(GenPanel):
                 towrite_ready_spectra[spec]=GenPanel.ready_spec[spec].A
                 print("File" + file_path + f" '{spec}' saved in: ready_{file_name}.csv in column {spec}")
             towrite_ready_spectra.to_csv(file_path + 'ready_' +  file_name + ".csv", index=True)
+        wavelength = str(self.field_timetrace.GetValue())
+        GenPanel.list_spec.to_csv(file_path + 'time-trace_' + wavelength + '_nm.csv', index=True)
+        
         self.GetParent().right_panel.figure.savefig(file_path + file_name + ".svg", dpi=900 , transparent=True,bbox_inches='tight')
         self.GetParent().right_panel.figure.savefig(file_path + file_name + ".png", dpi=900, transparent=True,bbox_inches='tight')
         self.GetParent().right_panel.figure.savefig(file_path + file_name + ".pdf", dpi=900, transparent=True,bbox_inches='tight')
@@ -1063,7 +1081,7 @@ class FileChooser(wx.Dialog):
         self.Bind(wx.EVT_CHECKLISTBOX, self.on_checklistbox)
     
     def on_checklistbox(self, event):
-        selections = self.check_list_box.GetChecked()
+        selections = self.check_list_box.GetCheckedItems()
         if self.numtodrop != None:
             self.btn_ok.Enable(len(selections) == self.numtodrop)
         else:
