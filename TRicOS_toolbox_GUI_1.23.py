@@ -965,6 +965,7 @@ class LeftPanel(GenPanel):
                 except KeyError:
                     print(i + 'was not deleted from ready_spec as it has never been scattering corrected')
                 del GenPanel.raw_spec[i]
+                GenPanel.list_spec.drop(labels=i, inplace=True)   #[list(GenPanel.list_spec.file_name == i)]
                 print(f"deleting files(s) {i} from raw")
              
  #this needs to be update panel with the LeftPanel.typercor variable
