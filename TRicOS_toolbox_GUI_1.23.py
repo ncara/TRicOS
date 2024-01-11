@@ -270,7 +270,7 @@ class RightPanel(GenPanel):
         self.figure.clear()
         ax = self.figure.add_subplot()
         if self.GetParent().left_panel.TRicOS_checkbox.GetValue() :
-            pal='Spectral_r'
+            pal='Spectral'
         else :
             pal='bright'
             
@@ -285,8 +285,7 @@ class RightPanel(GenPanel):
                 a=GenPanel.raw_spec[i].A[GenPanel.raw_spec[i].wl.between(800,900)].min()
                 if not (mth.isinf(a) | mth.isnan(a)):
                     listmin.append(a)
-            # for i in GenPanel.raw_spec :
-            #     ax.plot(GenPanel.raw_spec[i].wl, GenPanel.raw_spec[i].A)
+                    
             globmax=max(listmax)
             globmin=min(listmin)
             ax.set_xlabel('Wavelength [nm]', fontsize=20)  
@@ -297,7 +296,7 @@ class RightPanel(GenPanel):
             n=0   
             if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                 centroids = self.GetParent().left_panel.mass_center(typecorr = typecorr)                                        
-            for i in GenPanel.raw_spec :                          
+            for i in GenPanel.list_spec.sort_index(axis=0).file_name : #GenPanel.raw_spec :                          
                              
                 
                 if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
@@ -353,7 +352,7 @@ class RightPanel(GenPanel):
             n=0
             if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                 centroids = self.GetParent().left_panel.mass_center(typecorr = typecorr)  
-            for i in GenPanel.const_spec :
+            for i in GenPanel.list_spec.sort_index(axis=0).file_name : #GenPanel.const_spec :
                 
                 if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                     ax.plot(GenPanel.const_spec[i].wl,
@@ -404,7 +403,7 @@ class RightPanel(GenPanel):
             n=0  
             if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                 centroids = self.GetParent().left_panel.mass_center(typecorr = typecorr)                                            
-            for i in GenPanel.ready_spec :
+            for i in GenPanel.list_spec.sort_index(axis=0).file_name : #GenPanel.ready_spec :
                 if self.GetParent().left_panel.mass_center_checkbox.GetValue() :
                     ax.plot(GenPanel.ready_spec[i].wl,                  
                           GenPanel.ready_spec[i].A ,                   
@@ -447,19 +446,19 @@ class RightPanel(GenPanel):
                       color=palette[n]) 
             #     ax.axvline(centroids[i], color = palette[n], ls = '-.')
             else :
-                if self.GetParent().left_panel.scaling_checkbox.GetValue() :
-                    ax.plot(GenPanel.diffspec.wl,                  
-                            GenPanel.diffspec.A ,                   
-                            linewidth=2,
-                            # label=" mass center = " +format(GenPanel.diffspec[GenPanel.diffspec.wl.between(scaling_top-10,scaling_top+10)].A.idxmax(), '.2f'), 
-                            color=palette[n]) 
+#                if self.GetParent().left_panel.scaling_checkbox.GetValue() :
+                ax.plot(GenPanel.diffspec.wl,                  
+                        GenPanel.diffspec.A ,                   
+                        linewidth=2,
+                        # label=" mass center = " +format(GenPanel.diffspec[GenPanel.diffspec.wl.between(scaling_top-10,scaling_top+10)].A.idxmax(), '.2f'), 
+                        color=palette[n]) 
                     
             n=n+1
             ax.set_title('difference in crystallo absorbance spectrum', fontsize=20, fontweight='bold')  
             ax.set_xlim([250, 1000])
-            ax.set_ylim([GenPanel.diffspec.A.min()-0.05, GenPanel.diffspec.A.max()+0.1])
+            ax.set_ylim([GenPanel.diffspec.A[300:800].min()-0.05, GenPanel.diffspec.A[300:800].max()+0.1])
             ax.tick_params(labelsize=16)
-            ax.legend(loc='upper right', shadow=True, prop={'size':8})
+#            ax.legend(loc='upper right', shadow=True, prop={'size':8})
             self.canvas.draw()
         elif typecorr == 'time-trace':
             xticks=[8,10,100,1000,10000,100000,1000000,10000000]
@@ -935,17 +934,17 @@ class LeftPanel(GenPanel):
             GenPanel.diffspec.wl = GenPanel.raw_spec[selections[0]].wl
             GenPanel.diffspec.index = GenPanel.diffspec.wl
             GenPanel.diffspec.A = GenPanel.raw_spec[selections[0]].A-GenPanel.raw_spec[selections[1]].A
-            # print(GenPanel.diffspec[350:700])
+            print(GenPanel.diffspec[350:700])
         elif self.typecorr == 'const':
             GenPanel.diffspec.wl = GenPanel.const_spec[selections[0]].wl
             GenPanel.diffspec.index = GenPanel.diffspec.wl
             GenPanel.diffspec.A = GenPanel.const_spec[selections[0]].A-GenPanel.const_spec[selections[1]].A
-            # print(GenPanel.diffspec[350:700])
+            print(GenPanel.diffspec[350:700])
         elif self.typecorr == 'ready':
             GenPanel.diffspec.wl = GenPanel.ready_spec[selections[0]].wl
             GenPanel.diffspec.index = GenPanel.diffspec.wl
             GenPanel.diffspec.A = GenPanel.ready_spec[selections[0]].A-GenPanel.ready_spec[selections[1]].A
-            # print(GenPanel.diffspec[350:700])
+            print(GenPanel.diffspec[350:700])
         self.update_right_panel('diff')
     
     def on_drop_spec(self, event): #htis should open a Filechooser dialog and remove the 
